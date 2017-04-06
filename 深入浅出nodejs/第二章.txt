@@ -1,0 +1,111 @@
+模块加载三个步骤：
+    1.路径分析
+    2.文件定位
+    3.编译执行
+
+ 模块标识符
+   主要分一下几类
+    a.核心模块，如http、fs、path等
+    b. .或.. 开始的相对路径文件模块
+    c. 以/开始的绝对路径文件模块
+    d. 非路径形式的文件模块  如 导入 express模块（即自定义模块）
+
+ 模块分为核心模块和文件模块
+    核心模块中 比较特殊的 用C/C++编写的模块 叫内建模块
+ 加载优先级：
+    缓存加载 》 核心模块加载 》 路径形式的文件模块 》 自定义模块
+
+ 自定义模块加载规则：
+   a. 当前文件目录下的node_modules目录
+   b. 父目录下的node_modules目录
+   c. 父目录的父目录下的node_module目录
+   d. 沿路径向上逐级递归，直到根目录
+ 文件定位：
+   若不加文件名后缀，node 自动以.js .node .json顺序查找
+
+ 内建模块/扩展模块
+   扩展模块和内建模块是一样的都是 挂载在target上，但是扩展模块不能像内建模块那样将对象声明到node_module_list链表上
+   所以无法被认为是原生模块，只能通过dlopen（）来动态加载， 所以以.node文件加载时node会自动调用process.dlopen（）
+
+   但是对用户来说只需要使用require（），这些都是透明的
+
+
+C/C++扩展模块
+#ifndef NODE_HELLO_H_
+#define NODE_HELLO_H_
+#include<v8.h>
+
+namespace node {
+  v8::Handle<v8::Value> SayHello(const v8::Argument& args);
+}
+
+
+#include<node.h>
+#include "node_hello.h"
+#include "v8.h"
+
+namespace node {
+  using namespace v8;
+  Handle<Value> SayHello(const Arguments& args) {
+    HandleScope scope;
+    return scope.Close(String::New("hello world!"));
+  }
+
+  void Init_Hello(Handle<Object> target) {
+    target->Set(String::New("sayHello"), FunctionTemplate::New(SayHello)->GetFunction());
+  }
+}
+
+// 注册到内存中
+NODE_MODULE(node_hello, node::Init_Hello)
+
+使用项目管理工具 node_gyp 生产你的项目
+ npm install -g node_gyp // 安装node_gyp
+
+ node_gyp 约定的.gyp 是binding.gyp
+  例如：
+    {
+      'target': [
+        'sources': [
+          'hello.cc'
+        ],
+        'conditions': [
+          [ 'OS == "win"',
+            {
+              'libraries': ['-lnode.lib']
+            }
+          ]
+        ]
+      ]
+    }
+
+  node-gyp configure // 生成build目录
+
+  node-gyp build  // 编译
+
+前端异步加载（AMD，CMD），而 node是同步加载
+
+
+npm常用功能
+
+注册用户
+npm adduser
+
+发布项目
+npm publish .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
