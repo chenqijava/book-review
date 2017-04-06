@@ -1,0 +1,56 @@
+模块机制
+
+node使用了CommonJS的模块规范  他是同步加载
+在文件的前后添加
+(function（exports, require, module, __filename, __dirname) { \n
+
+
+
+}); \n
+
+COMMONJS规范：
+    1. 模块引入
+        var math = require（'math'）
+    2. 模块定义
+        // main.js
+        exports.add = function(){
+          var sum = 0, i = 0,
+            args = arguments,
+            l = args.length;
+          while (i < l) {
+            sum += args[i]
+          }
+          return sum
+        }
+
+
+        // program.js
+        var math = require('./math')
+        exports.increment = function(val) {
+          return math.add(val, 1)
+        }
+
+        只有exports导出的方法属性才能使用
+
+    3. 模块标识
+        传递给require（）的参数，必须是符合小驼峰命名的字符串，或者以. .. 开头的相对路径，或者绝对路径。可以没有后缀
+
+当二次加载时，会优先从缓存加载
+
+引入模块三个步骤：
+    a.路径分析
+    b.文件定位
+    c.编译执行
+
+
+
+
+
+
+
+
+
+
+
+
+
