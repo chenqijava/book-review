@@ -1,0 +1,69 @@
+理解Buffer
+
+Buffer对象类似数组， 他的元素为16进制的两位数， 即0-255
+
+new Buffer（100）分配长度为100的Buffer， 可以通过下标访问
+new Buffer（str, 'utf-8'）
+var buf = new Buffer(100)
+buf[10] = -1
+console.log(buf[10])  // 255
+buf[10] = 300
+console.log(buf[10])  // 44
+buf[10] = 3.14
+console.log(buf[10])  // 3
+
+
+Buffer内存分配
+  slab分配机制， 是一种动态内存管理机制
+  8K来区分Buffer是大对象还是小对象
+
+如果Buffer的大小小于8k
+  会创建一个8k的slab  标记为empty
+  在slab上创建buffer，buffer的parent指向pool buffer的offset保存开始的位置
+  slab的used指向buffer的长度+ 8 - (buffer.长度%8)
+  slab标记为partial部分分配
+
+  若还需要Buffer时， 会查看slab的空间够不够，不够会继续分配一个slab，保存那个对象，原来slab中的空间就会浪费
+
+大于4k就是大对象
+  直接分配一个slab
+
+Buffer转字符串
+  buf.toString([encoding], [start], [end])
+
+字符串转Buffer
+  new Buffer(str, [encoding])  默认utf-8
+
+Buffer.isEncoding(encoding) //是否支持编码
+
+iconv-lite/iconv两个模块支持更多的编码
+
+Buffer拼接  宽字符占3个元素 字母半角符号占一个元素
+所以中文使用Buffer时会有截断的问题
+解决方案
+rs.setEncoding()/string_decoder()
+
+将多个小Buffer拼接成一个大对象
+var chunks = []
+var size = 0
+res.on('data', function (chunk) {
+  chunks.push(chunk)
+  size += chunk.length
+})
+
+res.on('end'，function() {
+  var buf = Buffer.concat(chunks, size)
+  var str = iconv.decode(buf, 'utf-8')
+  console.log(str)
+})
+
+Buffer.concat(chunks, size)
+
+性能：
+  将字符串转成Buffer能web服务的请求效率
+
+  文件读取时， 设置highWaterMark设置buffer大小
+
+
+
+
