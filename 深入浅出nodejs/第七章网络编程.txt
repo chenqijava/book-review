@@ -1,0 +1,124 @@
+
+网络编程
+
+构建tcp服务
+// 服务器
+var net = require('net')
+
+var server = net.createServer(function(socket){
+  // 处理从客户端发送过来的消息
+  socket.on('data', function(data){
+    console.log('你好');
+  });
+  // 链接出现错误
+  socket.on('end', function(){
+    console.log('链接断开');
+  });
+  socket.write('欢迎光临实例:\n')
+})
+// 监听端口
+server.listen(8000, function(){
+  console.log('success')
+})
+
+// 客户端
+var net = require('net')
+
+/*var client = net.connect({port: 8000}, function (){ // 'connect' listener
+  console.log('连上服务器')
+  console.log(socket)
+  client.write('hello world')
+});*/
+// 等价于
+var client = net.connect({host:'127.0.0.1', port: 8000})
+client.on('connect', function(){
+  client.write('hello world')
+});
+
+client.on('data', function(data){
+  console.log(data.toString())
+})
+
+client.on('end', function(){
+  console.log('client disconnected')
+})
+
+
+tcp服务的事件
+    服务器事件
+    listening： 在调用 server.listen()绑定端口后调用， 简洁语法 server.listen(port, listeningListener), 第二个参数传入
+    connection：
+    close
+    error
+
+    连接事件
+    data
+    end
+    connect
+    drain
+    error
+    close
+    timeout
+
+构建udp服务
+// 服务器
+var dgram = require('dgram')
+var server = dgram.createSocket('udp4')
+
+server.on('message', function (msg, rinfo){
+  console.log(msg)
+  console.log(rinfo.address+':'+rinfo.port)
+})
+
+server.on("listening", function(){
+  var address = server.address()
+  console.log(address.address+':'+address.port)
+})
+
+server.bind(41234);
+
+// udp客户端
+var dgram = require('dgram')
+
+var client = dgram.createSocket("udp4")
+
+client.send(new Buffer('hello world'), 41234, '127.0.0.1', function (err) {
+  client.close()
+})
+
+与tcp套接字比udp套接字，不是一个Stream实例
+自定义事件
+    message
+    listening
+    close
+    error
+
+构建http服务
+var http = require('http')
+http.createServer((req, res) => {
+  res.writeHead(200, {Content-Type: 'text/plain'})
+  res.end('hello world')
+}).listen(8080, '127.0.0.1')
+console.log('success')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
